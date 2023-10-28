@@ -53,12 +53,12 @@ vector<char> grammar::first(char nonTerminalElement) {
 }
 
 vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTerminals) {
-    if (std::find(processedNonTerminals.begin(), processedNonTerminals.end(), nonTerminalElement) != processedNonTerminals.end())
+    if (find(processedNonTerminals.begin(), processedNonTerminals.end(), nonTerminalElement) != processedNonTerminals.end())
         return {};
 
     vector<char> currentTerminals = getTerminals();
 
-    if (std::find(currentTerminals.begin(), currentTerminals.end(), nonTerminalElement) !=
+    if (find(currentTerminals.begin(), currentTerminals.end(), nonTerminalElement) !=
             currentTerminals.end())
         return { nonTerminalElement };
 
@@ -72,18 +72,47 @@ vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTe
             transitionsFromSpecifiedNonTerminal.push_back(this->transitions[i]);
     }
 
-    // NonTerminal -> abra
-
     for (int i = 0; i < transitionsFromSpecifiedNonTerminal.size(); i++) {
-        vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[0], processedNonTerminals);
+        if (isEpsilon(transitionsFromSpecifiedNonTerminal[i].getTo())) {
+            result.push_back(getEpsilon());
+            continue;
+        }
+
+        int epsilonTrimmedIndex = 0;
+        while (transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex] == getEpsilon()) {
+            epsilonTrimmedIndex++;
+            if (epsilonTrimmedIndex == transitionsFromSpecifiedNonTerminal[i].getTo().size()) {
+                epsilonTrimmedIndex = -1;
+                break;
+            }
+        }
+
+        if (epsilonTrimmedIndex == -1)
+            continue;
+
+        vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], processedNonTerminals);
         for (char terminal: subFirst)
             result.push_back(terminal);
     }
 
-    std::set<char> resultDistinctSet(result.begin(), result.end());
-    std::vector<char> resultDistinct(resultDistinctSet.begin(), resultDistinctSet.end());
+    set<char> resultDistinctSet(result.begin(), result.end());
+    vector<char> resultDistinct(resultDistinctSet.begin(), resultDistinctSet.end());
 
     return resultDistinct;
+}
+
+bool grammar::isEpsilon(vector<char> word) {
+    vector<char> epsilonVector = getEpsilonVector();
+    return word.size() == epsilonVector.size() && equal(word.begin(), word.end(), epsilonVector.begin());
+}
+
+vector<char> grammar::getEpsilonVector() {
+    vector<char> epsilonVector = {'e'};
+    return epsilonVector;
+}
+
+char grammar::getEpsilon() {
+    return 'e';
 }
 
 #pragma clang diagnostic pop

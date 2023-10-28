@@ -18,10 +18,15 @@ public:
 
     [[nodiscard]] char getAxiom() const; // Axiom is start non-terminals
     [[nodiscard]] int getTerminalsAmount() const;
+
     [[nodiscard]] int getNonTerminalsAmount() const;
+
     [[nodiscard]] int getTransitionsAmount() const;
+
     vector<char> getTerminals();
+
     vector<char> getNonTerminals();
+
     vector<transition> getTransitions();
 
     // TODO: Rewrite with First K
@@ -37,6 +42,10 @@ private:
     vector<transition> transitions;
 
     vector<char> first(char nonTerminalElement, vector<char> processedNonTerminals);
+
+    static bool isEpsilon(vector<char> word);
+    static vector<char> getEpsilonVector();
+    static char getEpsilon();
 };
 
 #endif //LLKANALYZER_GRAMMAR_H
