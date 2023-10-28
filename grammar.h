@@ -30,7 +30,7 @@ public:
     vector<transition> getTransitions();
 
     // TODO: Rewrite with First K
-    vector<char> first(char nonTerminalElement);
+    vector<char> first(char letter, int k);
 
 private:
     int terminalAmount;
@@ -41,7 +41,7 @@ private:
     vector<char> terminals;
     vector<transition> transitions;
 
-    vector<char> first(char nonTerminalElement, vector<char> processedNonTerminals);
+    vector<char> first(char letter, int k, vector<char> processedNonTerminals);
 
     static bool isEpsilon(vector<char> word);
     static vector<char> getEpsilonVector();

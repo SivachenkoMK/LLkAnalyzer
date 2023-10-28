@@ -48,27 +48,27 @@ char grammar::getAxiom() const {
     return axiom;
 }
 
-vector<char> grammar::first(char nonTerminalElement) {
-    return this->first(nonTerminalElement, {});
+vector<char> grammar::first(char letter, int k) {
+    return this->first(letter, k, {});
 }
 
-vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTerminals) {
-    if (find(processedNonTerminals.begin(), processedNonTerminals.end(), nonTerminalElement) != processedNonTerminals.end())
+vector<char> grammar::first(char letter, int k, vector<char> processedNonTerminals) {
+    if (find(processedNonTerminals.begin(), processedNonTerminals.end(), letter) != processedNonTerminals.end())
         return {};
 
     vector<char> currentTerminals = getTerminals();
 
-    if (find(currentTerminals.begin(), currentTerminals.end(), nonTerminalElement) !=
-            currentTerminals.end())
-        return { nonTerminalElement };
+    if (find(currentTerminals.begin(), currentTerminals.end(), letter) !=
+        currentTerminals.end())
+        return {letter};
 
-    processedNonTerminals.push_back(nonTerminalElement);
+    processedNonTerminals.push_back(letter);
 
     vector<transition> transitionsFromSpecifiedNonTerminal;
     vector<char> result;
 
     for (int i = 0; i < getTransitionsAmount(); i++) {
-        if (this->transitions[i].getFrom() == nonTerminalElement)
+        if (this->transitions[i].getFrom() == letter)
             transitionsFromSpecifiedNonTerminal.push_back(this->transitions[i]);
     }
 
@@ -82,13 +82,13 @@ vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTe
             }
         }
 
-        if (epsilonTrimmedIndex == -1)
-        {
+        if (epsilonTrimmedIndex == -1) {
             result.push_back(getEpsilon());
             continue;
         }
 
-        vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], processedNonTerminals);
+        vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], k,
+                                      processedNonTerminals);
         for (char terminal: subFirst)
             result.push_back(terminal);
     }
