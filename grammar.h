@@ -6,6 +6,7 @@
 #define LLKANALYZER_GRAMMAR_H
 #include <utility>
 #include <vector>
+#include <iostream>
 #include "transition.h"
 
 using namespace std;
@@ -46,6 +47,7 @@ private:
     static bool isEpsilon(vector<char> word);
     static vector<char> getEpsilonVector();
     static char getEpsilon();
+    static vector<char> concatenateResults(vector<vector<char>> stepsResult, int k);
 };
 
 #endif //LLKANALYZER_GRAMMAR_H

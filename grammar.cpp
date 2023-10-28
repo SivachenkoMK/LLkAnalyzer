@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <set>
 #include <utility>
+#include <iostream>
 #include "grammar.h"
 
 grammar::grammar(char axiom, vector<char> terminals, vector<char> nonTerminals, vector<transition> transitions) {
@@ -65,7 +66,7 @@ vector<char> grammar::first(char letter, int k, vector<char> processedNonTermina
     processedNonTerminals.push_back(letter);
 
     vector<transition> transitionsFromSpecifiedNonTerminal;
-    vector<char> result;
+    vector<vector<char>> subResults;
 
     for (int i = 0; i < getTransitionsAmount(); i++) {
         if (this->transitions[i].getFrom() == letter)
@@ -82,16 +83,24 @@ vector<char> grammar::first(char letter, int k, vector<char> processedNonTermina
             }
         }
 
+        vector<char> result;
+
         if (epsilonTrimmedIndex == -1) {
             result.push_back(getEpsilon());
             continue;
         }
 
-        vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], k,
-                                      processedNonTerminals);
-        for (char terminal: subFirst)
-            result.push_back(terminal);
+        for (;epsilonTrimmedIndex < transitionsFromSpecifiedNonTerminal.size(); epsilonTrimmedIndex++) {
+            vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], k,
+                                          processedNonTerminals);
+            for (char terminal: subFirst)
+                result.push_back(terminal);
+
+            subResults.push_back(result);
+        }
     }
+
+    vector<char> result = concatenateResults(subResults, k);
 
     set<char> resultDistinctSet(result.begin(), result.end());
     vector<char> resultDistinct(resultDistinctSet.begin(), resultDistinctSet.end());
@@ -105,12 +114,30 @@ bool grammar::isEpsilon(vector<char> word) {
 }
 
 vector<char> grammar::getEpsilonVector() {
-    vector<char> epsilonVector = {'e'};
-    return epsilonVector;
+    return {'e'};
 }
 
 char grammar::getEpsilon() {
     return 'e';
+}
+
+vector<char> grammar::concatenateResults(vector<vector<char>> stepsResult, int k) {
+    vector<char> result;
+
+    for (const auto& sequence : stepsResult)
+    {
+        result.push_back('{');
+        for (const auto& element : sequence)
+        {
+            result.push_back(element);
+        }
+        result.push_back('}');
+    }
+
+    for (const auto letter : result)
+    {
+        cout << letter;
+    }
 }
 
 #pragma clang diagnostic pop

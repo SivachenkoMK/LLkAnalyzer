@@ -60,8 +60,8 @@ int main() {
     }
 
     auto *inputGrammar = new grammar(Axiom, terminals, nonTerminals, transitions);
-    vector<char> firstS = inputGrammar->first('S');
-    vector<char> firstA = inputGrammar->first('A');
+    vector<char> firstS = inputGrammar->first('S', 2);
+    vector<char> firstA = inputGrammar->first('A', 2);
 
     return 0;
 }
