@@ -73,11 +73,6 @@ vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTe
     }
 
     for (int i = 0; i < transitionsFromSpecifiedNonTerminal.size(); i++) {
-        if (isEpsilon(transitionsFromSpecifiedNonTerminal[i].getTo())) {
-            result.push_back(getEpsilon());
-            continue;
-        }
-
         int epsilonTrimmedIndex = 0;
         while (transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex] == getEpsilon()) {
             epsilonTrimmedIndex++;
@@ -88,7 +83,10 @@ vector<char> grammar::first(char nonTerminalElement, vector<char> processedNonTe
         }
 
         if (epsilonTrimmedIndex == -1)
+        {
+            result.push_back(getEpsilon());
             continue;
+        }
 
         vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], processedNonTerminals);
         for (char terminal: subFirst)
