@@ -20,6 +20,8 @@ public:
 private:
     char from;
     vector<char> to;
+    static vector<char> removeEpsilons(vector<char> to);
+    static char getEpsilon();
 };
 
 

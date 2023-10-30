@@ -8,7 +8,8 @@
 
 transition::transition(char from, vector<char> to) {
     this->from = from;
-    this->to = std::move(to);
+    vector<char> optimizedTransitions = removeEpsilons(to);
+    this->to = std::move(optimizedTransitions);
 }
 
 transition::~transition() = default;
@@ -19,4 +20,22 @@ char transition::getFrom() const {
 
 vector<char> transition::getTo() const {
     return to;
+}
+
+vector<char> transition::removeEpsilons(vector<char> to) {
+    if (to.size() == 1)
+        return to;
+
+    vector<char> toWithoutEpsilons;
+
+    for (auto element : to) {
+        if (element != getEpsilon())
+            toWithoutEpsilons.push_back(element);
+    }
+
+    return toWithoutEpsilons;
+}
+
+char transition::getEpsilon() {
+    return 'e';
 }

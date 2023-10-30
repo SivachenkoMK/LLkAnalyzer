@@ -49,63 +49,80 @@ char grammar::getAxiom() const {
     return axiom;
 }
 
-vector<char> grammar::first(char letter, int k) {
-    return this->first(letter, k, {});
+vector<vector<char>> grammar::first(char letter, int k) {
+    auto resultToConcatenate = this->first(letter, k, {});
+    printVector(resultToConcatenate);
+
+    vector<vector<char>> vector;
+    return vector;
 }
 
-vector<char> grammar::first(char letter, int k, vector<char> processedNonTerminals) {
-    if (find(processedNonTerminals.begin(), processedNonTerminals.end(), letter) != processedNonTerminals.end())
-        return {};
+// Return format: first layer - terminals for a word, second layer - sequence of words, third layer - sequence for all combinations
+vector<vector<vector<char>>> grammar::first(char letter, int k, vector<char> processedNonTerminals) {
+    if (recursiveIterationBeyondLimit(letter, processedNonTerminals, k))
+        return {{{}}};
 
-    vector<char> currentTerminals = getTerminals();
+    vector<char> allTerminals = getTerminals();
 
-    if (find(currentTerminals.begin(), currentTerminals.end(), letter) !=
-        currentTerminals.end())
-        return {letter};
+    if (find(allTerminals.begin(), allTerminals.end(), letter) !=
+        allTerminals.end())
+        return { { {letter} } };
 
     processedNonTerminals.push_back(letter);
 
     vector<transition> transitionsFromSpecifiedNonTerminal;
-    vector<vector<char>> subResults;
 
     for (int i = 0; i < getTransitionsAmount(); i++) {
         if (this->transitions[i].getFrom() == letter)
             transitionsFromSpecifiedNonTerminal.push_back(this->transitions[i]);
     }
 
+    vector<vector<vector<char>>> result;
     for (int i = 0; i < transitionsFromSpecifiedNonTerminal.size(); i++) {
-        int epsilonTrimmedIndex = 0;
-        while (transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex] == getEpsilon()) {
-            epsilonTrimmedIndex++;
-            if (epsilonTrimmedIndex == transitionsFromSpecifiedNonTerminal[i].getTo().size()) {
-                epsilonTrimmedIndex = -1;
-                break;
-            }
-        }
-
-        vector<char> result;
-
-        if (epsilonTrimmedIndex == -1) {
-            result.push_back(getEpsilon());
+        if (isEpsilon(transitions[i].getTo())) {
+            result.push_back({{getEpsilon()}});
             continue;
         }
+        // Combine result into -> {
+        // A -> BC (call B, call C) return { [ {c, d}, {e, f} ], [ {c, d}, {g} ] }
+        // B - cd return { {c, d} }
+        // C -> ef return { {e, f} }
+        // C -> g return { {g} }
 
-        for (;epsilonTrimmedIndex < transitionsFromSpecifiedNonTerminal.size(); epsilonTrimmedIndex++) {
-            vector<char> subFirst = first(transitionsFromSpecifiedNonTerminal[i].getTo()[epsilonTrimmedIndex], k,
-                                          processedNonTerminals);
-            for (char terminal: subFirst)
-                result.push_back(terminal);
+        for (int j = 0; j <= transitionsFromSpecifiedNonTerminal.size() && j < k; j++) {
+            vector<vector<char>> subResults;
+            char letterFrom = transitionsFromSpecifiedNonTerminal[i].getFrom();
+            char currentLetter = transitionsFromSpecifiedNonTerminal[i].getTo()[j];
 
-            subResults.push_back(result);
+            cout << "Going from " << letterFrom << " to " << currentLetter << endl;
+            vector<vector<vector<char>>> sequenceOfFirstForThisLetter = first(currentLetter, k,
+                                                                              processedNonTerminals);
+
+            vector<char> terminalLetters;
+            for (const auto &firstForLetter: sequenceOfFirstForThisLetter) {
+                for (const auto &word: firstForLetter) {
+                    for (auto terminalLetter: word) {
+                        terminalLetters.push_back(terminalLetter);
+                    }
+                }
+                if (!terminalLetters.empty())
+                    subResults.push_back(terminalLetters);
+            }
+
+            if (!subResults.empty())
+                result.push_back(subResults);
+
+            cout << (int) letterFrom << " " << letterFrom << ": ";
+            printVector(result);
+            cout << endl;
         }
     }
 
-    vector<char> result = concatenateResults(subResults, k);
+    vector<vector<char>> distinctResults;
+    // Concatenate stuff
+    // Introduce distinct stuff
 
-    set<char> resultDistinctSet(result.begin(), result.end());
-    vector<char> resultDistinct(resultDistinctSet.begin(), resultDistinctSet.end());
-
-    return resultDistinct;
+    return result;
 }
 
 bool grammar::isEpsilon(vector<char> word) {
@@ -121,23 +138,57 @@ char grammar::getEpsilon() {
     return 'e';
 }
 
-vector<char> grammar::concatenateResults(vector<vector<char>> stepsResult, int k) {
-    vector<char> result;
+//vector<vector<char>> grammar::concatenateResults(vector<vector<vector<char>>> stepsResult, int k) {
+//    vector<char> result;
+//
+//    for (const auto& sequence : stepsResult)
+//    {
+//        result.push_back('{');
+//        for (const auto& element : sequence)
+//        {
+//            result.push_back(element);
+//        }
+//        result.push_back('}');
+//    }
+//
+//    for (const auto letter : result)
+//    {
+//        cout << letter;
+//    }
+//}
 
-    for (const auto& sequence : stepsResult)
-    {
-        result.push_back('{');
-        for (const auto& element : sequence)
-        {
-            result.push_back(element);
+void grammar::printVector(const vector<vector<vector<char>>>& vec) {
+    std::cout << "{ ";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        std::cout << "[ ";
+        for (size_t j = 0; j < vec[i].size(); ++j) {
+            std::cout << "{ ";
+            for (size_t k = 0; k < vec[i][j].size(); ++k) {
+                std::cout << "'" << vec[i][j][k] << "'";
+                if (k != vec[i][j].size() - 1) {
+                    std::cout << ", ";
+                }
+            }
+            std::cout << " }";
+            if (j != vec[i].size() - 1) {
+                std::cout << ", ";
+            }
         }
-        result.push_back('}');
+        std::cout << " ]";
+        if (i != vec.size() - 1) {
+            std::cout << ", ";
+        }
     }
+    std::cout << " }" << std::endl;
+}
 
-    for (const auto letter : result)
-    {
-        cout << letter;
+bool grammar::recursiveIterationBeyondLimit(char letter, vector<char> processedNonTerminals, int k) {
+    int i = 0;
+    for (auto element : processedNonTerminals) {
+        if (element == letter)
+            i++;
     }
+    return i >= k;
 }
 
 #pragma clang diagnostic pop

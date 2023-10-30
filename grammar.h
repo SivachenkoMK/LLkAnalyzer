@@ -31,7 +31,7 @@ public:
     vector<transition> getTransitions();
 
     // TODO: Rewrite with First K
-    vector<char> first(char letter, int k);
+    vector<vector<char>> first(char letter, int k);
 
 private:
     int terminalAmount;
@@ -42,12 +42,14 @@ private:
     vector<char> terminals;
     vector<transition> transitions;
 
-    vector<char> first(char letter, int k, vector<char> processedNonTerminals);
+    vector<vector<vector<char>>> first(char letter, int k, vector<char> processedNonTerminals);
 
     static bool isEpsilon(vector<char> word);
     static vector<char> getEpsilonVector();
     static char getEpsilon();
-    static vector<char> concatenateResults(vector<vector<char>> stepsResult, int k);
+    //static vector<vector<char>> concatenateResults(vector<vector<vector<char>>> stepsResult, int k);
+    static void printVector(const vector<vector<vector<char>>>& vec);
+    static bool recursiveIterationBeyondLimit(char letter, vector<char> processedNonTerminals, int k);
 };
 
 #endif //LLKANALYZER_GRAMMAR_H
