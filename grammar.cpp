@@ -3,10 +3,6 @@
 //
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"
-#include <algorithm>
-#include <set>
-#include <utility>
-#include <iostream>
 #include "grammar.h"
 
 grammar::grammar(char axiom, vector<char> terminals, vector<char> nonTerminals, vector<transition> transitions) {
@@ -79,8 +75,8 @@ vector<vector<vector<char>>> grammar::first(char letter, int k, vector<char> pro
 
     vector<vector<vector<char>>> result;
     for (int i = 0; i < transitionsFromSpecifiedNonTerminal.size(); i++) {
-        if (isEpsilon(transitions[i].getTo())) {
-            result.push_back({{getEpsilon()}});
+        if (static_definitions::isEpsilon(transitions[i].getTo())) {
+            result.push_back({{static_definitions::getEpsilon()}});
             continue;
         }
         // Combine result into -> {
@@ -123,19 +119,6 @@ vector<vector<vector<char>>> grammar::first(char letter, int k, vector<char> pro
     // Introduce distinct stuff
 
     return result;
-}
-
-bool grammar::isEpsilon(vector<char> word) {
-    vector<char> epsilonVector = getEpsilonVector();
-    return word.size() == epsilonVector.size() && equal(word.begin(), word.end(), epsilonVector.begin());
-}
-
-vector<char> grammar::getEpsilonVector() {
-    return {'e'};
-}
-
-char grammar::getEpsilon() {
-    return 'e';
 }
 
 //vector<vector<char>> grammar::concatenateResults(vector<vector<vector<char>>> stepsResult, int k) {

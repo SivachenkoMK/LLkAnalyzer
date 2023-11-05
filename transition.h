@@ -5,6 +5,8 @@
 #ifndef LLKANALYZER_TRANSITION_H
 #define LLKANALYZER_TRANSITION_H
 #include <vector>
+#include <utility>
+#include "static_definitions.h"
 
 using namespace std;
 
@@ -21,7 +23,6 @@ private:
     char from;
     vector<char> to;
     static vector<char> removeEpsilons(vector<char> to);
-    static char getEpsilon();
 };
 
 

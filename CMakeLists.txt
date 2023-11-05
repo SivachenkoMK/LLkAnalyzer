@@ -7,4 +7,10 @@ add_executable(LLkAnalyzer main.cpp
         grammar.cpp
         grammar.h
         transition.cpp
-        transition.h)
+        transition.h
+        helper_class.h
+        helper_class.cpp
+        sequence_analyzer.cpp
+        sequence_analyzer.h
+        static_definitions.cpp
+        static_definitions.h)

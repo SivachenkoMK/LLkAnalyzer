@@ -4,8 +4,6 @@
 
 #include "transition.h"
 
-#include <utility>
-
 transition::transition(char from, vector<char> to) {
     this->from = from;
     vector<char> optimizedTransitions = removeEpsilons(to);
@@ -29,13 +27,9 @@ vector<char> transition::removeEpsilons(vector<char> to) {
     vector<char> toWithoutEpsilons;
 
     for (auto element : to) {
-        if (element != getEpsilon())
+        if (element != static_definitions::getEpsilon())
             toWithoutEpsilons.push_back(element);
     }
 
     return toWithoutEpsilons;
-}
-
-char transition::getEpsilon() {
-    return 'e';
 }
