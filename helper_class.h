@@ -13,10 +13,10 @@ using namespace std;
 class helper_class {
 public:
     helper_class(const unordered_map<char, vector<string>>& firsts, const unordered_map<char, vector<string>>& follows,
-                 const grammar& gr);
+        const grammar& gr);
 
     helper_class(unordered_map<char, vector<vector<char>>> firstChars, unordered_map<char, vector<vector<char>>> followChars,
-                 grammar gr);
+        grammar gr);
 
     unordered_map<size_t, vector<string>> getHelperTable();
 

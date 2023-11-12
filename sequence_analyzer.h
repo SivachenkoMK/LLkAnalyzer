@@ -16,10 +16,10 @@ using namespace std;
 
 class sequence_analyzer {
 public:
-    sequence_analyzer(char startAxiom, vector<char> sequenceToAnalyze, unordered_map<string, vector<size_t>> mainTable, const grammar &gr);
-    bool analyzeSequence();
+    sequence_analyzer(char startAxiom, vector<char> sequenceToAnalyze, unordered_map<string, vector<size_t>> mainTable, const grammar& gr);
+    vector<size_t> analyzeSequence();
 private:
-    bool move();
+    bool move(vector<size_t>& res_vec);
     vector<char> stack;
     // all the input row
     vector<char> sequenceToAnalyze;

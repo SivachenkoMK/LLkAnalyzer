@@ -10,7 +10,7 @@ bool static_definitions::isEpsilon(vector<char> word) {
 }
 
 vector<char> static_definitions::getEpsilonVector() {
-    return {'e'};
+    return { 'e' };
 }
 
 char static_definitions::getEpsilon() {
@@ -28,7 +28,7 @@ vector<char> static_definitions::noEpsilonWord(const vector<char>& word) {
     return result;
 }
 
-vector<char> static_definitions::removeFirstN(const vector<char> &word, int n) {
+vector<char> static_definitions::removeFirstN(const vector<char>& word, int n) {
     vector<char> result;
 
     for (int i = n; i < word.size(); i++) {
@@ -39,10 +39,10 @@ vector<char> static_definitions::removeFirstN(const vector<char> &word, int n) {
 }
 
 int static_definitions::getK() {
-    return 2;
+    return 1;
 }
 
-bool static_definitions::isEqualVectors(const vector<char> &vec1, const vector<char> &vec2)  {
+bool static_definitions::isEqualVectors(const vector<char>& vec1, const vector<char>& vec2) {
     if (vec1.size() != vec2.size())
         return false;
     for (int i = 0; i < vec1.size(); i++) {

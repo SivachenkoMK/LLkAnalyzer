@@ -1,10 +1,9 @@
 a ( ) + *
 S A B C D
 S
-(a+((a*
 S -> BA
 A -> +BA
-A -> e(
+A -> e
 B -> DC
 C -> *DC
 C -> e

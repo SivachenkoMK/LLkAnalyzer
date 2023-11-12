@@ -6,7 +6,7 @@
 
 #include <utility>
 
-sequence_analyzer::sequence_analyzer(char startAxiom, vector<char> sequenceToAnalyze, unordered_map<string, vector<size_t>> mainTable, const grammar &gr) {
+sequence_analyzer::sequence_analyzer(char startAxiom, vector<char> sequenceToAnalyze, unordered_map<string, vector<size_t>> mainTable, const grammar& gr) {
     stack.push_back(startAxiom);
     sequenceToAnalyze = static_definitions::noEpsilonWord(sequenceToAnalyze);
     this->sequenceToAnalyze = sequenceToAnalyze;
@@ -14,24 +14,27 @@ sequence_analyzer::sequence_analyzer(char startAxiom, vector<char> sequenceToAna
     currentGrammar = gr;
 }
 
-bool sequence_analyzer::analyzeSequence() {
+vector<size_t> sequence_analyzer::analyzeSequence() {
+    vector<size_t> result;
     if (stack.empty())
-        return false;
+        return {};
 
     if (mainTable.empty())
-        return false;
+        return {};
 
     while (!stack.empty() || !currentSubSequence.empty())
     {
-        if (!move())
-            return false;
+        if (!move(result)) {
+            result.push_back(0);
+            return result;
+        }
     }
 
-    return true;
+    return result;
 }
 
 // Returns false if next transition is not possible
-bool sequence_analyzer::move() {
+bool sequence_analyzer::move(vector<size_t>& res_vec) {
     // check if the sequence starts with some terminal elements, eliminate them one by one or throw error if they don't match. Update current subsequence with first k, remove first n processed
 
     int amountOfSymbolsAddedToSubSequence = 0;
@@ -39,8 +42,29 @@ bool sequence_analyzer::move() {
         currentSubSequence.push_back(sequenceToAnalyze[amountOfSymbolsAddedToSubSequence]);
         amountOfSymbolsAddedToSubSequence++;
     }
+    if (amountOfSymbolsAddedToSubSequence > 0) {
+        sequenceToAnalyze = static_definitions::removeFirstN(sequenceToAnalyze, amountOfSymbolsAddedToSubSequence);
+    }
+    bool flag = 0;
+    if (sequenceToAnalyze.empty() && currentSubSequence.empty()) {
+        flag = 1;
+        vector<size_t> epsilonRules = mainTable["e"];
+        for (auto rule : epsilonRules) {
+            auto it = find(stack.begin(), stack.end(), currentGrammar.getTransitions()[rule - 1].getFrom());
+            if (it != stack.end())
+            {
+                stack.erase(it);
+                res_vec.push_back(rule);
+            }
+        }
+    }
+    if (flag) {
+        if (stack.empty())
+            return true;
+        else
+            return false;
+    }
 
-    sequenceToAnalyze = static_definitions::removeFirstN(sequenceToAnalyze, amountOfSymbolsAddedToSubSequence);
 
     vector<char> allTerminals = currentGrammar.getTerminals();
     if (stack[0] == currentSubSequence[0])
@@ -65,7 +89,7 @@ bool sequence_analyzer::move() {
     for (int i = static_definitions::getK(); i >= 0 && !isRuleFound; i--) {
         vector<char> currentWord;
         currentWord.reserve(i);
-        for (int j = 0; j < i; j++){
+        for (int j = 0; j < i; j++) {
             currentWord.push_back(currentSubSequence[j]);
         }
 
@@ -77,10 +101,11 @@ bool sequence_analyzer::move() {
         if (mainTable.find(key) != mainTable.end()) {
             rules = mainTable.at(key);
             for (auto rule : rules) {
-                if (currentGrammar.getTransitions()[rule-1].getFrom() == stack[0])
+                if (currentGrammar.getTransitions()[rule - 1].getFrom() == stack[0])
                 {
-                    to = currentGrammar.getTransitions()[rule-1].getTo();
+                    to = currentGrammar.getTransitions()[rule - 1].getTo();
                     isRuleFound = true;
+                    res_vec.push_back(rule);
                     break;
                 }
             }
@@ -96,5 +121,6 @@ bool sequence_analyzer::move() {
     if (!static_definitions::isEqualVectors(to, static_definitions::getEpsilonVector())) {
         to.insert(to.end(), stack.begin(), stack.end());
         stack = to;
-    }return true;
+    }
+    return true;
 }
