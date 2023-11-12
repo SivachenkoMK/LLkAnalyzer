@@ -6,11 +6,9 @@
 #define LLKANALYZER_GRAMMAR_H
 #include <utility>
 #include <vector>
-#include <iostream>
-#include <algorithm>
 #include "transition.h"
-#include "static_definitions.h"
-
+#include <unordered_map>
+#include <string>
 using namespace std;
 
 class grammar {
@@ -32,10 +30,14 @@ public:
 
     vector<transition> getTransitions();
 
-    // TODO: Rewrite with First K
-    vector<vector<char>> first(char letter, int k);
+    void setFirst_k(unordered_map<char, vector<vector<char>>>);
+    unordered_map<char, vector<vector<char>>> first(int k);
+
+    void setFollow_k(unordered_map<char, vector<vector<char>>>);
+    vector<vector<char>> follow(int k, char nonTerminalElement);
 
 private:
+    // vars
     int terminalAmount;
     int nonTerminalAmount;
     int transitionsAmount;
@@ -44,11 +46,23 @@ private:
     vector<char> terminals;
     vector<transition> transitions;
 
-    vector<vector<vector<char>>> first(char letter, int k, vector<char> processedNonTerminals);
+    unordered_map<char, vector<vector<char>>> first_k;
+    unordered_map<char, vector<vector<char>>> follow_k;
 
-    //static vector<vector<char>> concatenateResults(vector<vector<vector<char>>> stepsResult, int k);
-    static void printVector(const vector<vector<vector<char>>>& vec);
-    static bool recursiveIterationBeyondLimit(char letter, vector<char> processedNonTerminals, int k);
+    // methods
+
+    // first
+    bool isTerm(vector<char> to);
+    vector<vector<char>> concatenation(int k, vector<vector<char>> a, vector<vector<char>> b);
+    vector<vector<char>> iteration(int k, vector<char> To, const unordered_map<char, vector<vector<char>>>& first_k);
+
+    // follow
+    bool linearFilling(int k, vector<char>& terminals, const vector<char> afterElms, vector<vector<char>>* Follow_k, const transition* curtrans);
+    void RuleComposition(int k, vector<char> terminals, vector<vector<char>>* Follow_k, const transition* curtrans, vector<transition>* usedtrans);
+    // else
+    static bool isEpsilon(vector<char> word);
+    static vector<char> getEpsilonVector();
+    static char getEpsilon();
 };
 
 #endif //LLKANALYZER_GRAMMAR_H

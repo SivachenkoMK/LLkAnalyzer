@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <unordered_map>
 
 #include "grammar.h"
 #include "transition.h"
@@ -11,7 +12,7 @@
 using namespace std;
 
 int main() {
-    ifstream inputFile("../grammar.txt");
+    ifstream inputFile("grammar2.txt");
     if (!inputFile.is_open())
     {
         cout << "Error opening file." << endl;
@@ -27,85 +28,101 @@ int main() {
 
     vector<transition> transitions;
 
-    vector<char> resultingSequence;
-
     while (getline(inputFile, line)) {
         rowCount++;
         switch (rowCount) {
-            case 0: {
-                stringstream stream(line);
-                while (stream >> ws) {
-                    char token;
-                    if (stream >> token) {
-                        terminals.push_back(token);
-                    }
+        case 0: {
+            stringstream stream(line);
+            while (stream >> ws) {
+                char token;
+                if (stream >> token) {
+                    terminals.push_back(token);
                 }
-            } break;
-            case 1: {
-                stringstream steam(line);
-                while (steam >> ws) {
-                    char token;
-                    if (steam >> token) {
-                        nonTerminals.push_back(token);
-                    }
-                }
-            } break;
-            case 2: Axiom = line[0];  break;
-            case 3: {
-                stringstream steam(line);
-                while (steam >> ws) {
-                    char token;
-                    if (steam >> token) {
-                        resultingSequence.push_back(token);
-                    }
-                }
-            } break;
-            default: {
-                char from = line[0];
-                vector<char> to;
-                string toSequence = line.substr(5);
-                for (char symbol: toSequence) {
-                    to.push_back(symbol);
-                }
-                transitions.emplace_back(from, to);
             }
+        } break;
+        case 1: {
+            stringstream steam(line);
+            while (steam >> ws) {
+                char token;
+                if (steam >> token) {
+                    nonTerminals.push_back(token);
+                }
+            }
+        } break;
+        case 2: Axiom = line[0];  break;
+        /*case 3: {
+            stringstream steam(line);
+            while (steam >> ws) {
+                char token;
+                if (steam >> token) {
+                    resultingSequence.push_back(token);
+                }
+            }
+        } break;*/
+        default: {
+            char from = line[0];
+            vector<char> to;
+            string toSequence = line.substr(5);
+            for (char symbol : toSequence) {
+                to.push_back(symbol);
+            }
+            transitions.emplace_back(from, to);
+        }
         }
     }
 
-    auto *inputGrammar = new grammar(Axiom, terminals, nonTerminals, transitions);
-    //vector<vector<char>> firstS = inputGrammar->first('S', static_definitions::getK());
+    auto* inputGrammar = new grammar(Axiom, terminals, nonTerminals, transitions);
 
-    unordered_map<char, vector<string>> firstK;
-    unordered_map<char, vector<string>> followK;
-    vector<string> valuesForS = { "a", "a+", "a*", "(a", "((" };
-    vector<string> valuesForA = { "e", "+a", "+("};
-    vector<string> valuesForB = { "a", "a*", "(a", "((" };
-    vector<string> valuesForC = { "e", "*a", "*("};
-    vector<string> valuesForD = { "a", "(a", "((" };
-    firstK['S'] = valuesForS;
-    firstK['A'] = valuesForA;
-    firstK['B'] = valuesForB;
-    firstK['C'] = valuesForC;
-    firstK['D'] = valuesForD;
-    valuesForS = {"e", "*"};
-    valuesForA = {"e", ")"};
-    valuesForB = {"+", "e", ")"};
-    valuesForC = {"+", "e", ")"};
-    valuesForD = {"+", "*", "e", ")"};
-    followK['S'] = valuesForS;
-    followK['A'] = valuesForA;
-    followK['B'] = valuesForB;
-    followK['C'] = valuesForC;
-    followK['D'] = valuesForD;
-//    vector<string> followS = inputGrammar->followK(2, 'S', firstK);
-//    vector<string> followA = inputGrammar->followK(1, 'A', firstK);
-//    vector<string> followB = inputGrammar->followK(2, 'B', firstK);
-//    vector<string> followC = inputGrammar->followK(1, 'C', firstK);
-//    vector<string> followD = inputGrammar->followK(1, 'D', firstK);
-    auto *table = new helper_class(firstK, followK, *inputGrammar);
+    // filling first_k and follow_k
+    unordered_map<char, vector<vector<char>>> firstK, followK;
+    cout << "First " << static_definitions::getK() << endl;
+    firstK = inputGrammar->first(static_definitions::getK());
+    inputGrammar->setFirst_k(firstK);
+
+    for (char NT : inputGrammar->getNonTerminals()) {
+
+        cout << NT << " : ";
+        for (vector<char> Ts : firstK[NT]) {
+            for (char T : Ts) {
+                cout << T;
+            }
+            cout << ' ';
+        }
+        cout << endl;
+    }
+    cout << "Follow " << static_definitions::getK() << endl;
+    for (char NT : inputGrammar->getNonTerminals()) {
+        followK[NT] = inputGrammar->follow(static_definitions::getK(), NT);
+
+        cout << NT << " : ";
+        for (vector<char> Ts : followK[NT]) {
+            for (char T : Ts) {
+                cout << T;
+            }
+            cout << ' ';
+        }
+        cout << endl;
+    }
+    inputGrammar->setFollow_k(followK);
+    cout << "--------------------" << endl;
+
+    auto* table = new helper_class(firstK, followK, *inputGrammar);
     table->printMainTable();
 
+    cout << "--------------------" << endl;
+
+    //vector<char> resultingSequence = vector<char>({ '(', 'a', '+', 'a',')','*', 'a' }); // grammar 1
+    //vector<char> resultingSequence = vector<char>({ 'i','+','n','*','i','+','(',')','!', }); // grammar 2
+    vector<char> resultingSequence = vector<char>({ '(','*','!','n','!','*',')', }); //grammar 2
+    //vector<char> resultingSequence = vector<char>({ '(','a','+','a',')', }); // grammar 3
+    for (char ch : resultingSequence) {
+        cout << ch;
+    }
+    cout << endl;
     auto* analyzer = new sequence_analyzer(Axiom, resultingSequence, table->getMainTable(), *inputGrammar);
-    bool result = analyzer->analyzeSequence();
+    vector<size_t> result = analyzer->analyzeSequence();
+    for (auto elem : result)
+        cout << elem << endl;
+   
     return 0;
 }

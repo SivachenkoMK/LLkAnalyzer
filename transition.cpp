@@ -4,10 +4,11 @@
 
 #include "transition.h"
 
+#include <utility>
+
 transition::transition(char from, vector<char> to) {
     this->from = from;
-    vector<char> optimizedTransitions = removeEpsilons(to);
-    this->to = std::move(optimizedTransitions);
+    this->to = std::move(to);
 }
 
 transition::~transition() = default;
@@ -20,16 +21,12 @@ vector<char> transition::getTo() const {
     return to;
 }
 
-vector<char> transition::removeEpsilons(vector<char> to) {
-    if (to.size() == 1)
-        return to;
+bool transition::operator==(const transition& other) const
+{
+    return (other.from == from) && (other.to == to);
+}
 
-    vector<char> toWithoutEpsilons;
-
-    for (auto element : to) {
-        if (element != static_definitions::getEpsilon())
-            toWithoutEpsilons.push_back(element);
-    }
-
-    return toWithoutEpsilons;
+bool transition::operator!=(const transition& other) const
+{
+    return !(*this == other);;
 }
